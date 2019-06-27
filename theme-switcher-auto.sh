@@ -14,12 +14,12 @@ day="0$daytime"
 
 if [[ $time > $night ]] || [[ $time < $day ]]; then
     gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
-    gsettings set org.gnome.desktor.background picture-uri "file://$night_wallpapers"
+    gsettings set org.gnome.desktop.background picture-uri "file://$night_wallpapers"
     #gsettings set org.gnome.Terminal.ProfilesList default $terminal_dark
     exit 0
 else
     gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita'
-    gsettings set org.gnome.desktor.background picture-uri "file://$day_wallpapers"
+    gsettings set org.gnome.desktop.background picture-uri "file://$day_wallpapers"
     #gsettings set org.gnome.Terminal.ProfilesList default $terminal_light
     exit 0
 fi
