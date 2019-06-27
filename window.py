@@ -14,8 +14,6 @@ class MyWindow(Gtk.ApplicationWindow):
         self.set_border_width(10)
         self.set_default_size(400, 200)
         
-        self.init_settings()
-        
         self.init_headerbar()
         self.set_titlebar(self.header_bar)
         
@@ -74,50 +72,47 @@ class MyWindow(Gtk.ApplicationWindow):
         filter_text.add_mime_type("image/png")
         dialog.add_filter(filter_text)
         
-    def on_test_button_clicked(self, widget):
-        print(self.daytime)
-        print(self.nighttime)
-        
     def on_set_daytime_button_clicked(self, button):
         entry_text = self.day_entry.get_text()
         try:
             entry_text = int(entry_text)
-            if entry_text > 23:
-                message_dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.ERROR,
-                    Gtk.ButtonsType.CANCEL, "Please enter a correct time")
-                message_dialog.format_secondary_text("Please enter a number between 00 and 23.")
-                message_dialog.run()
-
-                message_dialog.destroy()
-            else:
-                self.settings.set_string("daytime", str(entry_text))
         except ValueError:
             message_dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.ERROR,
                 Gtk.ButtonsType.CANCEL, "Please enter a correct number")
             message_dialog.run()
 
             message_dialog.destroy()
+        if entry_text > 23:
+            message_dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.CANCEL, "Please enter a correct time")
+            message_dialog.format_secondary_text("Please enter a number between 00 and 23.")
+            message_dialog.run()
+
+            message_dialog.destroy()
+        else:
+            self.settings.set_string("daytime", str(entry_text))
         
     def on_set_nighttime_button_clicked(self, button):
         entry_text = self.night_entry.get_text()
         try:
             entry_text = int(entry_text)
-            if entry_text > 23:
-                message_dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.ERROR,
-                    Gtk.ButtonsType.CANCEL, "Please enter a correct time")
-                message_dialog.format_secondary_text("Please enter a number between 00 and 23.")
-                message_dialog.run()
-
-                message_dialog.destroy()
-            #TODO add check that night bigger than day
-            else:
-                self.settings.set_string("nighttime", str(entry_text))
         except ValueError:
             message_dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.ERROR,
                 Gtk.ButtonsType.CANCEL, "Please enter a correct number")
             message_dialog.run()
 
             message_dialog.destroy()
+            
+        if entry_text > 23:
+            message_dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.CANCEL, "Please enter a correct time")
+            message_dialog.format_secondary_text("Please enter a number between 00 and 23.")
+            message_dialog.run()
+
+            message_dialog.destroy()
+        #TODO add check that night bigger than day
+        else:
+            self.settings.set_string("nighttime", str(entry_text))
                 
     def on_auto_toggled(self, auto_button, gparam):
         if self.auto_button.get_active():
@@ -127,10 +122,8 @@ class MyWindow(Gtk.ApplicationWindow):
             state = "off"
             self.state_off()
             
-    def init_settings(self):
-    
-        self.settings = Gio.Settings.new(self.BASE_KEY)
-        print(dir(self.settings))
+    def on_auto_switch_change(self, settings, key, auto_button):
+        self.auto_button.set_active(settings.get_boolean("auto-switch"))
         
     def reset(self, button):
         
@@ -153,6 +146,10 @@ class MyWindow(Gtk.ApplicationWindow):
         header_box.add(header_label)
         
         self.auto_button = Gtk.Switch()
+        
+        self.settings = Gio.Settings.new(self.BASE_KEY)
+        self.settings.connect("changed::auto-switch", self.on_auto_switch_change, self.auto_button)
+        
         self.auto_button.set_active(self.settings.get_boolean("auto-switch"))
         self.auto_button.connect("notify::active", self.on_auto_toggled)
         header_box.add(self.auto_button)
@@ -198,7 +195,7 @@ class MyWindow(Gtk.ApplicationWindow):
         
         self.day_entry = Gtk.Entry()
         self.day_entry.set_input_purpose(Gtk.InputPurpose.NUMBER)
-        self.day_entry.set_text("6")
+        self.day_entry.set_text(self.settings.get_string("daytime"))
         daytime_box.add(self.day_entry)
         
         set_daytime_button = Gtk.Button("Set")
@@ -213,7 +210,7 @@ class MyWindow(Gtk.ApplicationWindow):
         
         self.night_entry = Gtk.Entry()
         self.night_entry.set_input_purpose(Gtk.InputPurpose.NUMBER)
-        self.night_entry.set_text("23")
+        self.night_entry.set_text(self.settings.get_string("nighttime"))
         nighttime_box.add(self.night_entry)
         
         set_nighttime_button = Gtk.Button("Set")
