@@ -48,7 +48,6 @@ class MyWindow(Gtk.ApplicationWindow):
             day_wallpaper = dialog.get_filename()
             self.settings.set_string("path-to-day-wallpaper", day_wallpaper)
             self.file_button_day.set_label(day_wallpaper.split("/")[-1])
-                       
         dialog.destroy()
         
     def on_night_wallpaper_choose(self, widget):
