@@ -11,84 +11,23 @@ class MyWindow(Gtk.ApplicationWindow):
         self.set_border_width(10)
         self.set_default_size(400, 200)
         
-        header_bar = Gtk.HeaderBar()
-        header_bar.set_show_close_button(True)
-        header_bar.props.title = "Theme Switcher"
-        self.set_titlebar(header_bar)
+        self.init_headerbar()
+        self.set_titlebar(self.header_bar)
         
         self.box = Gtk.Box(spacing=6)
         self.box.set_orientation(Gtk.Orientation.VERTICAL)
         self.add(self.box)
         
-        grid_left = Gtk.Grid()
-        grid_left.set_column_homogeneous(True)
-        grid_left.set_row_homogeneous(True)
+        self.init_upper_grid()
+        self.init_bottom_grid()
         
-        label_day = Gtk.Label("File for day:")
-        grid_left.add(label_day)
-        self.file_button_day = Gtk.Button("Choose Day Wallpaper")
-        self.file_button_day.connect("clicked", self.on_day_wallpaper_choose)
-        grid_left.attach_next_to(self.file_button_day, label_day, Gtk.PositionType.BOTTOM, 1, 1)
-        
-        label_night = Gtk.Label("File for night:")
-        grid_left.attach_next_to(label_night, self.file_button_day, Gtk.PositionType.BOTTOM, 1, 1)
-        self.file_button_night = Gtk.Button("Choose Night Wallpaper")
-        self.file_button_night.connect("clicked", self.on_night_wallpaper_choose)
-        grid_left.attach_next_to(self.file_button_night, label_night, Gtk.PositionType.BOTTOM, 1, 1)
-        
-        self.box.pack_start(grid_left, True, True, 0)
-
-        grid_right = Gtk.Grid()
-        grid_right.set_column_homogeneous(True)
-        grid_right.set_row_homogeneous(True)
-        time_label = Gtk.Label("Time Manage:")
-        grid_right.add(time_label)
-        
-        daytime_box = Gtk.Box()
-        daytime_box.set_homogeneous(True)
-        daytime_box.set_orientation(Gtk.Orientation.HORIZONTAL)
-        day_label = Gtk.Label("Daytime: ")
-        daytime_box.add(day_label)
-        self.day_entry = Gtk.Entry()
-        self.day_entry.set_input_purpose(Gtk.InputPurpose.NUMBER)
-        self.day_entry.set_text("6")
-        daytime_box.add(self.day_entry)
-        set_daytime_button = Gtk.Button("Set")
-        set_daytime_button.connect("clicked", self.on_set_daytime_button_clicked)
-        daytime_box.add(set_daytime_button)
-        grid_right.attach_next_to(daytime_box, time_label, Gtk.PositionType.BOTTOM, 1, 1)
-        
-        nighttime_box = Gtk.Box()
-        nighttime_box.set_homogeneous(True)
-        nighttime_box.set_orientation(Gtk.Orientation.HORIZONTAL)
-        night_label = Gtk.Label("Night: ")
-        nighttime_box.add(night_label)
-        self.night_entry = Gtk.Entry()
-        self.night_entry.set_input_purpose(Gtk.InputPurpose.NUMBER)
-        self.night_entry.set_text("23")
-        nighttime_box.add(self.night_entry)
-        set_nighttime_button = Gtk.Button("Set")
-        set_nighttime_button.connect("clicked", self.on_set_nighttime_button_clicked)
-        nighttime_box.add(set_nighttime_button)
-        grid_right.attach_next_to(nighttime_box, daytime_box, Gtk.PositionType.BOTTOM, 1, 1)
-        
-        self.box.pack_start(grid_right, True, True, 0)
-
-        header_box = Gtk.Box(spacing=6)
-        header_box.set_orientation(Gtk.Orientation.HORIZONTAL)
-        header_bar.pack_start(header_box)
-        
-        header_label = Gtk.Label("Auto:")
-        header_box.add(header_label)
-        
-        self.auto_button = Gtk.Switch()
-        self.auto_button.connect("notify::active", self.on_auto_toggled)
-        header_box.add(self.auto_button)
+        self.box.pack_start(self.grid_left, True, True, 0)
+        self.box.pack_start(self.grid_right, True, True, 0)
         
         self.init_settings()
         test_button = Gtk.Button(label="Debug")
         test_button.connect("clicked", self.on_test_button_clicked)
-        header_bar.pack_end(test_button)
+        self.header_bar.pack_end(test_button)
         
     def state_off(self):
         subprocess.call(['systemctl','stop','--user','theme-switcher-auto.timer'])
@@ -190,3 +129,80 @@ class MyWindow(Gtk.ApplicationWindow):
         state = "on"
         self.daytime = 6
         self.nighttime = 20
+        
+    def init_headerbar(self):
+        self.header_bar = Gtk.HeaderBar()
+        self.header_bar.set_show_close_button(True)
+        self.header_bar.props.title = "Theme Switcher"
+        
+        header_box = Gtk.Box(spacing=6)
+        header_box.set_orientation(Gtk.Orientation.HORIZONTAL)
+        
+        header_label = Gtk.Label("Auto:")
+        header_box.add(header_label)
+        
+        self.auto_button = Gtk.Switch()
+        self.auto_button.connect("notify::active", self.on_auto_toggled)
+        header_box.add(self.auto_button)
+        
+        self.header_bar.pack_start(header_box)
+        
+    def init_upper_grid(self):
+        self.grid_left = Gtk.Grid()
+        self.grid_left.set_column_homogeneous(True)
+        self.grid_left.set_row_homogeneous(True)
+        
+        label_day = Gtk.Label("File for day:")
+        self.grid_left.add(label_day)
+        
+        self.file_button_day = Gtk.Button("Choose Day Wallpaper")
+        self.file_button_day.connect("clicked", self.on_day_wallpaper_choose)
+        self.grid_left.attach_next_to(self.file_button_day, label_day, Gtk.PositionType.BOTTOM, 1, 1)
+        
+        label_night = Gtk.Label("File for night:")
+        self.grid_left.attach_next_to(label_night, self.file_button_day, Gtk.PositionType.BOTTOM, 1, 1)
+        
+        self.file_button_night = Gtk.Button("Choose Night Wallpaper")
+        self.file_button_night.connect("clicked", self.on_night_wallpaper_choose)
+        self.grid_left.attach_next_to(self.file_button_night, label_night, Gtk.PositionType.BOTTOM, 1, 1)
+        
+    def init_bottom_grid(self):
+        self.grid_right = Gtk.Grid()
+        self.grid_right.set_column_homogeneous(True)
+        self.grid_right.set_row_homogeneous(True)
+        
+        time_label = Gtk.Label("Time Manage:")
+        self.grid_right.add(time_label)
+        
+        daytime_box = Gtk.Box()
+        daytime_box.set_homogeneous(True)
+        daytime_box.set_orientation(Gtk.Orientation.HORIZONTAL)
+        day_label = Gtk.Label("Daytime: ")
+        daytime_box.add(day_label)
+        
+        self.day_entry = Gtk.Entry()
+        self.day_entry.set_input_purpose(Gtk.InputPurpose.NUMBER)
+        self.day_entry.set_text("6")
+        daytime_box.add(self.day_entry)
+        
+        set_daytime_button = Gtk.Button("Set")
+        set_daytime_button.connect("clicked", self.on_set_daytime_button_clicked)
+        daytime_box.add(set_daytime_button)
+        
+        nighttime_box = Gtk.Box()
+        nighttime_box.set_homogeneous(True)
+        nighttime_box.set_orientation(Gtk.Orientation.HORIZONTAL)
+        night_label = Gtk.Label("Night: ")
+        nighttime_box.add(night_label)
+        
+        self.night_entry = Gtk.Entry()
+        self.night_entry.set_input_purpose(Gtk.InputPurpose.NUMBER)
+        self.night_entry.set_text("23")
+        nighttime_box.add(self.night_entry)
+        
+        set_nighttime_button = Gtk.Button("Set")
+        set_nighttime_button.connect("clicked", self.on_set_nighttime_button_clicked)
+        nighttime_box.add(set_nighttime_button)
+        
+        self.grid_right.attach_next_to(daytime_box, time_label, Gtk.PositionType.BOTTOM, 1, 1)
+        self.grid_right.attach_next_to(nighttime_box, daytime_box, Gtk.PositionType.BOTTOM, 1, 1)
